@@ -1,0 +1,76 @@
+#ifndef SD_HIGHLEVEL_H
+#define SD_HIGHLEVEL_H
+
+#ifdef HIGHLEVEL_DEBUG
+#include "m_usb.h"
+#endif
+
+#include "sd_lowlevel.h"
+
+#define CRC_RETRIES     8
+#define TIMEOUT_RETRIES 5
+#define UNKNOWN_RETRIES 2
+
+enum card_error_codes
+{
+    ERROR_NONE = 0,     // no error
+    ERROR_RESET = 1,    // error resetting the card
+    ERROR_ENABLE_CRC,   // error enabling CRC
+    ERROR_INIT,         // error initializing the card
+    ERROR_BLOCK_LENGTH, // error setting the block length
+    ERROR_CARD_UNINIT,  // the card has not been initialized yet
+    ERROR_NULL_BUFFER,  // the read/write function was given a null buffer
+    ERROR_TOO_FAR,      // tried to read or write beyond the block length (512 bytes)
+    ERROR_TIMEOUT,      // timeout when reading/writing to the card
+    ERROR_CRC,          // too many CRC errors when reading/writing
+    ERROR_UNKNOWN,      // some other error
+    NUM_CARD_ERROR_CODES
+};
+
+// error_code contains the relevant error code if any of the functions return false
+extern uint8_t error_code;
+
+
+typedef enum crc_option
+{
+    USE_CRC,
+    //USE_CRC_WORKAROUND,
+    NO_CRC
+} crc_option;
+
+bool init_card (crc_option crc_type);
+
+bool error_recovery (void);
+
+// blocks are 512 bytes long
+
+
+// reads data
+//
+// the most recently read block is cached, so reading different parts of the
+// same block over multiple calls doesn't have much of a performance penalty
+bool read_partial_block (const uint32_t block_number,
+                         const uint16_t offset,
+                         uint8_t *buffer,
+                         const uint16_t length);
+
+// reads the CRC value of a block, without storing any block data
+bool read_block_crc (const uint32_t block_number,
+                     uint16_t *crc);
+
+
+// writes data to a block
+//
+// if not writing the entire block, then the write might not happen immediately
+// so that several small writes can be grouped into a single larger write
+bool write_partial_block (const uint32_t block_number,
+                          const uint16_t offset,
+                          const uint8_t *buffer,
+                          const uint16_t length);
+
+
+// flush any pending writes to the SD card
+bool write_commit (void);
+
+#endif
+
