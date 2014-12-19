@@ -14,7 +14,7 @@ MICROSD_FLAGS = -DM2
 # to include code supplied by maevarm, add a .o target
 # tag to the parents line (e.g. "PARENTS = "m_bus.o")
 # --------------------------------------------------------
-MAIN       = crc.o sd_lowlevel.o sd_highlevel.o sd_highlevel_cache.o sd_fat32.o
+MAIN       = crc.o sd_lowlevel.o sd_highlevel.o sd_highlevel_cache.o sd_fat32.o fat32_filenames.o test.o m_usb.o
 CHILDREN   = 
 PARENTS    = 
 
@@ -45,6 +45,9 @@ all:	main.hex
 	$(COMPILE) -S $< -o $@
 
 install: flash 
+
+info: all
+	avr-size -C --mcu=$(DEVICE) main.elf
 
 flash: all
 	dfu-programmer atmega32u4 erase

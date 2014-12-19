@@ -38,5 +38,7 @@
 #define m_sd_read_file           sd_fat32_read_file
 #define m_sd_write_file          sd_fat32_write_file
 
+#define m_sd_error_code          error_code
+
 #endif
 
