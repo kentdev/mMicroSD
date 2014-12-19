@@ -44,7 +44,7 @@ OBJDMP = $(ARCH)-objdump
 LDSCRIPT = $(LIBDIR)/$(STDIR)/STM32_FLASH.ld
 STARTUP  = $(LIBDIR)/$(STDIR)/startup_stm32f37x.s 
 
-CFLAGS  = -g -Os -std=c99
+CFLAGS  = -g -Os -std=c99 -DM4
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -ffunction-sections -fdata-sections
 CFLAGS += -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 CFLAGS += -specs=nano.specs -ffreestanding

@@ -56,6 +56,23 @@ void main (void)
     }
     printf ("Init OK\n");
     
+    
+    
+    //test of directory listings
+    char filename[13];
+    if (!m_sd_get_dir_entry_first (filename))
+    {
+        printf ("Error getting first directory entry: %d\n", (int)m_sd_error_code);
+        error();
+    }
+    
+    printf ("\t%s\n", filename);
+    
+    while (m_sd_get_dir_entry_next (filename))
+        printf ("\t%s\n", filename);
+    printf ("Finished, error = %d\n", (int)m_sd_error_code);
+    
+    
     /*
     // test of m_sd_get_size
     uint32_t size;
@@ -373,7 +390,7 @@ void main (void)
     }
     */
     
-    
+    /*
     // test mkdir, get_size, pushing, opening, closing, reading, writing, and seeking
     #define COPY_BUFFER_LEN 64
     char copy_buffer[COPY_BUFFER_LEN];
@@ -449,7 +466,7 @@ void main (void)
     
     if (!m_sd_close_file (output_file_1_id))
         printf ("Error closing somecopy.txt: %d\n", (int)m_sd_error_code);
-    
+    */
     
     
     if (!m_sd_shutdown())

@@ -33,7 +33,7 @@ endif
 
 CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fshort-enums -std=gnu99 -Os
 
-FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c
+FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c fat32_filenames.c
 
 DEFINES = -DF_CPU=$(CLOCK) -DF_CLOCK=$(CLOCK) $(DEVICEDEF)
 

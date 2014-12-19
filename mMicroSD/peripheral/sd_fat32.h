@@ -14,6 +14,7 @@
 // This is helpful, since the MBR and filesystem are also little-endian
 
 #include "sd_highlevel.h"
+#include "fat32_filenames.h"
 
 enum fat32_error_codes
 {  // these codes are numbered after the card error codes in sd_highlevel.h
@@ -243,16 +244,6 @@ bool sd_fat32_fill_sector (const uint32_t sector_num,
 // or it will keep reading from the old directory
 bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
                                   traverse_option action);
-
-// convert file names from their representation on disk
-// eg., "TEST    TXT" becomes "TEST.TXT"
-void filename_fs_to_8_3 (const char *input_name,
-                         char *output_name);
-
-// convert file names into their representation on disk
-// eg., "test.txt" becomes "TEST    TXT"
-void filename_8_3_to_fs (const char *input_name,
-                         char output_name[13]);
 
 // search the current directory for an object with the given name
 // if the object was found, it fills in result and returns true

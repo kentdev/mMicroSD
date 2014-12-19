@@ -891,11 +891,19 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
         
         // filler values for file entries
         // these values found by looking at files created with Linux's FAT32 driver
-        const uint8_t filler1[8] = {0x20, 0x00, 0x64, 0xa5, 0x7c, 0x64, 0x42, 0x92};
-        const uint8_t filler2[4] = {0xa5, 0x7c, 0x64, 0x42};
+        entry_to_add.filler[0] = 0x20;
+        entry_to_add.filler[1] = 0x00;
+        entry_to_add.filler[2] = 0x64;
+        entry_to_add.filler[3] = 0xa5;
+        entry_to_add.filler[4] = 0x7c;
+        entry_to_add.filler[5] = 0x64;
+        entry_to_add.filler[6] = 0x42;
+        entry_to_add.filler[7] = 0x92;
         
-        memset (entry_to_add.filler,  filler1, 8);
-        memset (entry_to_add.filler2, filler2, 4);
+        entry_to_add.filler2[0] = 0xa5;
+        entry_to_add.filler2[1] = 0x7c;
+        entry_to_add.filler2[2] = 0x64;
+        entry_to_add.filler2[3] = 0x42;
         
         entry_to_add.attrib = 0;
         if (buffer->flags & ENTRY_IS_DIR)
@@ -1152,99 +1160,6 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
     
     error_code = ERROR_FAT32_END_OF_DIR;
     return false;  // we should never get here
-}
-
-
-// convert file names from their representation on disk
-// eg., "TEST    TXT" becomes "TEST.TXT"
-void filename_fs_to_8_3 (const char *input_name,
-                         char output_name[13])
-{
-    uint8_t in_index = 0;
-    uint8_t out_index = 0;
-    
-    bool wrote_dot = false;
-    
-    while (in_index < 11 && out_index < 12)
-    {
-        if (in_index < 8)
-        {
-            if (input_name[in_index] == ' ')
-            {
-                in_index = 8;  // skip to the last 3 chars
-                continue;
-            }
-            else
-            {
-                output_name[out_index++] = input_name[in_index];
-            }
-        }
-        else
-        {  // extension characters
-            if (input_name[in_index] != ' ')
-            {
-                if (!wrote_dot)
-                {
-                    output_name[out_index++] = '.';
-                    wrote_dot = true;
-                }
-                output_name[out_index++] = input_name[in_index];
-            }
-        }
-        
-        in_index++;
-    }
-    
-    output_name[out_index] = '\0';
-}
-
-
-// convert file names into their representation on disk
-// eg., "test.txt" becomes "TEST    TXT"
-void filename_8_3_to_fs (const char *input_name,
-                         char *output_name)
-{
-    uint8_t in_index = 0;
-    uint8_t out_index = 0;
-    
-    char in_char;
-    
-    while (out_index < 11)
-    {
-        if (in_index >= 12 || input_name[in_index] == '\0')
-        {
-            break;
-        }
-        else if (input_name[in_index] == '.')
-        {  // encountered a period
-            while (out_index < 8)
-            {  // fill the output with spaces until the 3-char extension
-                output_name[out_index] = ' ';
-                out_index++;
-            }
-            
-            in_index++;
-        }
-        else
-        {
-            in_char = input_name[in_index];
-            
-            // convert to uppercase
-            if (in_char >= (char)0x61 && in_char <= (char)0x7a)
-				in_char -= 0x20;
-            
-            output_name[out_index] = in_char;
-            
-            in_index++;
-            out_index++;
-        }
-    }
-    
-    while (out_index < 11)
-    {
-        output_name[out_index] = ' ';
-        out_index++;
-    }
 }
 
 

@@ -3,7 +3,7 @@
 DEVICE     = atmega32u4
 CLOCK      = 16000000
 
-CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fpack-struct -fshort-enums -std=gnu99 -Os
+CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fpack-struct -fshort-enums -std=gnu99 -Os -DM2
 
 FILES = m_bus.c m_usb.c m_microsd.c test.c
 

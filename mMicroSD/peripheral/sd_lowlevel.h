@@ -13,12 +13,14 @@
 #ifndef SD_LOWLEVEL_H
 #define SD_LOWLEVEL_H
 
-#ifndef M4
+#if defined(M2) || defined(ATMEGA168) || defined(ATMEGA328)
 // AVR code
 #include "m_general.h"
-#else
+#elif defined(M4)
 // M4 code
 #include "mGeneral.h"
+#else
+#error "Unknown device, use -DM2, -DATMEGA168, -DATMEGA328, or -DM4 in your makefile"
 #endif
 
 #ifndef bool
