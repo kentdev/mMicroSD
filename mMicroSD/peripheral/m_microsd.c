@@ -315,7 +315,7 @@ void process_order (void)
                 bool retval = sd_fat32_get_dir_entry_first ((char *)&transmission.data[1]);
                 transmission.data[0] = (uint8_t)retval;
                 transmission.code = error_code;
-                transmission.data_length = 12;
+                transmission.data_length = 13;
             }
             break;
         
@@ -324,7 +324,7 @@ void process_order (void)
                 bool retval = sd_fat32_get_dir_entry_next ((char *)&transmission.data[1]);
                 transmission.data[0] = (uint8_t)retval;
                 transmission.code = error_code;
-                transmission.data_length = 12;
+                transmission.data_length = 13;
             }
             break;
         

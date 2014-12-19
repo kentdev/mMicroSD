@@ -191,7 +191,7 @@ extern opened_file files[MAX_FILES];
 bool verify_name (const char *name,
                   bool is_dir);
 
-bool filenames_match (const char a[11], const char b[11]);
+bool fs_filenames_match (const char a[11], const char b[11]);
 
 // get the next cluster from the current cluster
 //static bool sd_fat32_cluster_lookup (const uint32_t from_cluster,
@@ -252,7 +252,7 @@ void filename_fs_to_8_3 (const char *input_name,
 // convert file names into their representation on disk
 // eg., "test.txt" becomes "TEST    TXT"
 void filename_8_3_to_fs (const char *input_name,
-                         char *output_name);
+                         char output_name[13]);
 
 // search the current directory for an object with the given name
 // if the object was found, it fills in result and returns true
@@ -303,8 +303,8 @@ bool sd_fat32_object_exists (const char *name,
 
 // iterate through the current directory, reading the names of its objects
 // returns false when the end of the directory has been reached
-bool sd_fat32_get_dir_entry_first (char name[12]);
-bool sd_fat32_get_dir_entry_next  (char name[12]);
+bool sd_fat32_get_dir_entry_first (char name[13]);
+bool sd_fat32_get_dir_entry_next  (char name[13]);
 
 
 //-----------------------------------------------

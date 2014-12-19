@@ -393,7 +393,7 @@ bool sd_fat32_free_clusters (dir_entry_condensed *object)
 }
 
 
-bool filenames_match (const char a[11], const char b[11])
+bool fs_filenames_match (const char a[11], const char b[11])
 {
     for (uint8_t i = 0; i < 11; i++)
     {
@@ -889,6 +889,14 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
         for (uint8_t i = 0; i < 11; i++)
             entry_to_add.name[i] = buffer->name[i];
         
+        // filler values for file entries
+        // these values found by looking at files created with Linux's FAT32 driver
+        const uint8_t filler1[8] = {0x20, 0x00, 0x64, 0xa5, 0x7c, 0x64, 0x42, 0x92};
+        const uint8_t filler2[4] = {0xa5, 0x7c, 0x64, 0x42};
+        
+        memset (entry_to_add.filler,  filler1, 8);
+        memset (entry_to_add.filler2, filler2, 4);
+        
         entry_to_add.attrib = 0;
         if (buffer->flags & ENTRY_IS_DIR)
             entry_to_add.attrib |= 0b00010000;
@@ -964,7 +972,7 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
         
         if (action == REMOVE_ENTRY || action == UPDATE_ENTRY)
         {  // if we want to remove or update an entry, check the name
-            if (filenames_match (buffer->name, entry.name))
+            if (fs_filenames_match (buffer->name, entry.name))
             {  // we found the entry
                 if (action == REMOVE_ENTRY)
                 {
@@ -1150,14 +1158,14 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
 // convert file names from their representation on disk
 // eg., "TEST    TXT" becomes "TEST.TXT"
 void filename_fs_to_8_3 (const char *input_name,
-                         char *output_name)
+                         char output_name[13])
 {
     uint8_t in_index = 0;
     uint8_t out_index = 0;
     
     bool wrote_dot = false;
     
-    while (in_index < 11 && out_index < 11)
+    while (in_index < 11 && out_index < 12)
     {
         if (in_index < 8)
         {
@@ -1203,7 +1211,7 @@ void filename_8_3_to_fs (const char *input_name,
     
     while (out_index < 11)
     {
-        if (input_name[in_index] == '\0')
+        if (in_index >= 12 || input_name[in_index] == '\0')
         {
             break;
         }
@@ -1314,7 +1322,7 @@ bool sd_fat32_search_dir (const char *search_name,
     {
         // check this entry's name to see if it matches what we're looking for
         // if it matches, great; if not, check the next entry
-        if (filenames_match (result->name, name_8_3))
+        if (fs_filenames_match (result->name, name_8_3))
         {
             #ifdef FREE_RAM
             free_ram();
@@ -1452,7 +1460,7 @@ bool sd_fat32_object_exists (const char *name,
 
 // iterate through the current directory, reading the names of its objects
 // returns false when the end of the directory has been reached
-bool sd_fat32_get_dir_entry_first (char name[12])
+bool sd_fat32_get_dir_entry_first (char name[13])
 {
     dir_entry_condensed entry;
     
@@ -1462,8 +1470,7 @@ bool sd_fat32_get_dir_entry_first (char name[12])
         return false;
     }
     
-    for (uint8_t i = 0; i < 12; i++)
-        name[i] = '\0';
+    name[0] = '\0';  // make the name empty to start
     
     if (!sd_fat32_traverse_directory (&entry, READ_DIR_START))
         return false;
@@ -1474,14 +1481,13 @@ bool sd_fat32_get_dir_entry_first (char name[12])
             return false;
     }
     
-    for (uint8_t i = 0; i < 12; i++)
-        name[i] = entry.name[i];
+    filename_fs_to_8_3 (entry.name, name);
     
     error_code = ERROR_NONE;
     return true;
 }
 
-bool sd_fat32_get_dir_entry_next  (char name[12])
+bool sd_fat32_get_dir_entry_next  (char name[13])
 {
     dir_entry_condensed entry;
     
@@ -1491,8 +1497,7 @@ bool sd_fat32_get_dir_entry_next  (char name[12])
         return false;
     }
     
-    for (uint8_t i = 0; i < 12; i++)
-        name[i] = '\0';
+    name[0] = '\0';  // make the name empty to start
     
     if (!sd_fat32_traverse_directory (&entry, READ_DIR_NEXT))
         return false;
@@ -1503,8 +1508,7 @@ bool sd_fat32_get_dir_entry_next  (char name[12])
             return false;
     }
     
-    for (uint8_t i = 0; i < 12; i++)
-        name[i] = entry.name[i];
+    filename_fs_to_8_3 (entry.name, name);
     
     error_code = ERROR_NONE;
     return true;
@@ -1671,7 +1675,7 @@ bool sd_fat32_open_file (const char *name,
                 char fs_name[11];
                 filename_8_3_to_fs (name, fs_name);
                 
-                if (filenames_match (files[i].name_on_fs, fs_name))
+                if (fs_filenames_match (files[i].name_on_fs, fs_name))
                 {
                     error_code = ERROR_FAT32_ALREADY_OPEN;
                     return false;
@@ -2454,7 +2458,7 @@ bool sd_fat32_delete (const char *name)
         if (files[i].open && files[i].directory_starting_cluster == current_dir_cluster)
         {  // there's a file open and in the current directory
             // make sure the open file isn't the one we're trying to delete
-            if (filenames_match (to_remove.name, files[i].name_on_fs))
+            if (fs_filenames_match (to_remove.name, files[i].name_on_fs))
             {  // if it is, close it first
                 #ifdef FAT32_DEBUG
                 #ifndef M4

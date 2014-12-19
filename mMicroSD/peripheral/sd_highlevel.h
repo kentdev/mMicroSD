@@ -21,6 +21,8 @@
 //------------------------------------------------------------------------------
 // Sector caching
 
+#if !defined(CACHED_SECTORS) || CACHED_SECTORS < 1
+
 #if defined(ATMEGA168)
 #define CACHED_SECTORS 1
 #elif (defined(ATMEGA328) || defined(M2))
@@ -29,6 +31,8 @@
 #define CACHED_SECTORS 8
 #else
 #error Unknown target
+#endif
+
 #endif
 
 #if CACHED_SECTORS <= 0
