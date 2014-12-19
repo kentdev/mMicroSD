@@ -2,9 +2,6 @@
 #include "mUSB.h"
 #include "m_microsd.h"
 
-void filename_8_3_to_fs (const char *input_name,
-                         char *output_name);
-
 void error (void)
 {
     fflush (stdout);
