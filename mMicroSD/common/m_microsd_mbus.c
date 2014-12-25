@@ -30,6 +30,7 @@ typedef enum m_microsd_command_type
     M_SD_GET_SEEK,
     M_SD_READ_FILE,
     M_SD_WRITE_FILE,
+    M_SD_COMMIT,
     
     M_SD_NONE = 255
 } m_microsd_command_type;
@@ -495,6 +496,23 @@ bool m_sd_shutdown (void)
     return (m_sd_error_code == ERROR_NONE);
 }
 
+// commit any pending writes
+// useful if you don't know when the system might be powered off
+bool m_sd_commit (void)
+{
+    transmission.order.command = M_SD_COMMIT;
+    transmission.order.data_length = 0;
+    
+    if (!send_order())
+        return false;
+    
+    if (!receive_response())
+        return false;
+    
+    m_sd_error_code = transmission.response.response_code;
+    return (m_sd_error_code == ERROR_NONE);
+}
+
 
 //-----------------------------------------------
 // File and directory information:
@@ -594,7 +612,7 @@ bool m_sd_object_exists (const char *name,
 
 // iterate through the current directory, reading the names of its objects
 // returns false when the end of the directory has been reached
-bool m_sd_get_dir_entry_first (char name[13])
+bool m_sd_get_dir_entry_first (char name[13], uint32_t *size, bool *is_directory)
 {
     transmission.order.command = M_SD_GET_FIRST_ENTRY;
     transmission.order.data_length = 0;
@@ -611,7 +629,7 @@ bool m_sd_get_dir_entry_first (char name[13])
         return false;
     }
     
-    if (transmission.response.data_length == 0)
+    if (transmission.response.data_length < 6)
     {
         m_sd_error_code = ERROR_I2C_COMMAND;
         return false;
@@ -619,17 +637,32 @@ bool m_sd_get_dir_entry_first (char name[13])
     
     const bool retval = (bool)transmission.response.data[0];
     
-    if (retval)
+    if (size != NULL)
     {
-        filename_fs_to_8_3 ((char*)&(transmission.response.data[1]),
-                            name);
+        *size = ((uint32_t)transmission.response.data[1] << 24) |
+                ((uint32_t)transmission.response.data[2] << 16) |
+                ((uint32_t)transmission.response.data[3] << 8)  |
+                 (uint32_t)transmission.response.data[4];
+    }
+    
+    if (is_directory != NULL)
+        *is_directory = (bool)transmission.response.data[5];
+    
+    if (name != NULL)
+    {
+        name[0] = '\0';
+        if (retval)
+        {
+            filename_fs_to_8_3 ((char*)&(transmission.response.data[6]),
+                                name);
+        }
     }
     
     return retval;
 }
 
 
-bool m_sd_get_dir_entry_next  (char name[13])
+bool m_sd_get_dir_entry_next (char name[13], uint32_t *size, bool *is_directory)
 {
     transmission.order.command = M_SD_GET_NEXT_ENTRY;
     transmission.order.data_length = 0;
@@ -646,7 +679,7 @@ bool m_sd_get_dir_entry_next  (char name[13])
         return false;
     }
     
-    if (transmission.response.data_length == 0)
+    if (transmission.response.data_length < 6)
     {
         m_sd_error_code = ERROR_I2C_COMMAND;
         return false;
@@ -654,10 +687,25 @@ bool m_sd_get_dir_entry_next  (char name[13])
     
     const bool retval = (bool)transmission.response.data[0];
     
-    if (retval)
+    if (size != NULL)
     {
-        filename_fs_to_8_3 ((char*)&(transmission.response.data[1]),
-                            name);
+        *size = ((uint32_t)transmission.response.data[1] << 24) |
+                ((uint32_t)transmission.response.data[2] << 16) |
+                ((uint32_t)transmission.response.data[3] << 8)  |
+                 (uint32_t)transmission.response.data[4];
+    }
+    
+    if (is_directory != NULL)
+        *is_directory = (bool)transmission.response.data[5];
+    
+    if (name != NULL)
+    {
+        name[0] = '\0';
+        if (retval)
+        {
+            filename_fs_to_8_3 ((char*)&(transmission.response.data[6]),
+                                name);
+        }
     }
     
     return retval;

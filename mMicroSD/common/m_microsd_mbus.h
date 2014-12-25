@@ -98,6 +98,9 @@ bool m_sd_init (void);
 // flush any pending writes and unmount the filesystem
 bool m_sd_shutdown (void);
 
+// commit any pending writes
+// useful if you don't know when the system might be powered off
+bool m_sd_commit (void);
 
 //-----------------------------------------------
 // File and directory information:
@@ -113,8 +116,9 @@ bool m_sd_object_exists (const char *name,
 
 // iterate through the current directory, reading the names of its objects
 // returns false when the end of the directory has been reached
-bool m_sd_get_dir_entry_first (char name[13]);
-bool m_sd_get_dir_entry_next  (char name[13]);
+//   If you don't need certain information, set those parameters to NULL
+bool m_sd_get_dir_entry_first (char name[13], uint32_t *size, bool *is_directory);
+bool m_sd_get_dir_entry_next  (char name[13], uint32_t *size, bool *is_directory);
 
 
 //-----------------------------------------------
