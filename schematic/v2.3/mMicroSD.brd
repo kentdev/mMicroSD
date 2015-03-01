@@ -1717,11 +1717,11 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="VALUE" x="31.1912" y="9.144" size="0.6096" layer="21" font="vector" rot="R270"/>
 </element>
 <element name="R9" library="resistor" package="R0603" value="330" x="4.191" y="12.319" smashed="yes" rot="MR270">
-<attribute name="VALUE" x="3.556" y="14.859" size="1.016" layer="22" font="vector" rot="MR180"/>
+<attribute name="VALUE" x="3.683" y="13.97" size="1.016" layer="22" font="vector" rot="MR90"/>
 </element>
 <element name="LED1" library="led" package="SML0603" value="Green" x="4.953" y="15.24" smashed="yes"/>
 <element name="R10" library="resistor" package="R0603" value="330" x="6.223" y="12.319" smashed="yes" rot="MR270">
-<attribute name="VALUE" x="3.302" y="10.922" size="1.016" layer="22" font="vector" rot="MR180"/>
+<attribute name="VALUE" x="5.334" y="13.97" size="1.016" layer="22" font="vector" rot="MR90"/>
 </element>
 <element name="LED2" library="led" package="SML0603" value="Orange" x="4.953" y="14.097" smashed="yes"/>
 <element name="C3" library="resistor" package="C0603" value="1uF" x="26.543" y="5.969" smashed="yes" rot="MR0">
