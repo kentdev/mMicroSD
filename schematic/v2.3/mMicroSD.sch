@@ -7766,7 +7766,7 @@ Source: www.kingbright.com</description>
 <junction x="45.72" y="170.18"/>
 </segment>
 </net>
-<net name="N$10" class="0">
+<net name="GATE" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="PC2"/>
 <wire x1="22.86" y1="91.44" x2="7.62" y2="91.44" width="0.1524" layer="91"/>
@@ -7874,7 +7874,7 @@ Source: www.kingbright.com</description>
 <wire x1="88.9" y1="129.54" x2="88.9" y2="134.62" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$17" class="0">
+<net name="ADC_LINE" class="0">
 <segment>
 <pinref part="R3" gate="G$1" pin="1"/>
 <pinref part="R4" gate="G$1" pin="2"/>
@@ -7895,7 +7895,7 @@ Source: www.kingbright.com</description>
 <pinref part="LED1" gate="G$1" pin="A"/>
 </segment>
 </net>
-<net name="N$3" class="0">
+<net name="DATA_LED" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="PC0"/>
 <wire x1="22.86" y1="86.36" x2="22.86" y2="88.9" width="0.1524" layer="91"/>
