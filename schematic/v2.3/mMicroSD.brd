@@ -2090,7 +2090,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="25.908" y1="8.636" x2="26.416" y2="8.636" width="0.1778" layer="16"/>
 <wire x1="29.21" y1="10.541" x2="29.21" y2="13.337909375" width="0.1778" layer="16"/>
 <wire x1="29.21" y1="13.337909375" x2="30.692103125" y2="14.6930125" width="0.1778" layer="16"/>
-<wire x1="16.339925" y1="10.711075" x2="16.339925" y2="12.90348125" width="0" layer="19" extent="16-16"/>
+<wire x1="16.339925" y1="10.711075" x2="16.339925" y2="12.90348125" width="0.1524" layer="16"/>
 </signal>
 <signal name="VCC_MBUS">
 <contactref element="C1" pad="1"/>
@@ -2305,7 +2305,7 @@ Please make sure your boards conform to these design rules.</description>
 <via x="6.223" y="10.414" extent="1-16" drill="0.3556"/>
 <wire x1="6.223" y1="10.414" x2="6.223" y2="11.469" width="0.1778" layer="16"/>
 <wire x1="6.731" y1="9.144" x2="12.192" y2="9.144" width="0.1778" layer="1"/>
-<wire x1="13.27401875" y1="10.22098125" x2="14.457425" y2="10.22098125" width="0" layer="19" extent="16-16"/>
+<wire x1="14.457425" y1="10.22098125" x2="13.27401875" y2="10.22098125" width="0.1524" layer="16"/>
 </signal>
 <signal name="N$4">
 <contactref element="R10" pad="1"/>
