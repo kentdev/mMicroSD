@@ -11,11 +11,33 @@
 #define TWI_BUFFER_LEN 257
 
 // This code is designed to run on the ATmega168 or ATmega328, not the M2
+#ifdef M2
+    #error Peripheral code should not be used on the M2
+#endif
+
 
 #define set(reg,bit)		reg |= (1<<(bit))
 #define clear(reg,bit)		reg &= ~(1<<(bit))
 #define toggle(reg,bit)		reg ^= (1<<(bit))
 #define check(reg,bit)		(bool)(reg & (1<<(bit)))
+
+#define DATA_LED_DDR  DDRC
+#define DATA_LED_PORT PORTC
+#define DATA_LED_NUM  0
+
+#define GATE_DDR  DDRC
+#define GATE_PORT PORTC
+#define GATE_NUM  2
+
+inline void data_led_on (void)
+{
+    set (DATA_LED_PORT, DATA_LED_NUM);
+}
+
+inline void data_led_off (void)
+{
+    clear (DATA_LED_PORT, DATA_LED_NUM);
+}
 
 
 // I2C slave status codes:
@@ -94,7 +116,7 @@ static void error (void)
 {
     for (;;)
     {
-        toggle (PORTB, 0);
+        toggle (DATA_LED_PORT, DATA_LED_NUM);
         _delay_ms (125);
     }
 }
@@ -168,24 +190,90 @@ static void test_copy (void)
 
 void process_order (void);
 
+void voltage_divider_check (void)
+{
+    // The voltage divider between VCC and the microSD card ensures
+    // that the card will never be given more voltage than it's
+    // designed for (it can't tolerate 5V).  By default, the voltage
+    // divider is enabled, and will drop 5V to 3v3.  However, if VCC
+    // is already 3v3, the voltage divider must be disabled in order
+    // for the microSD card to be able to operate.
+    
+    // PC2 controls the voltage divider, and should be high or tri-state
+    // if the microcontroller is getting 5V and low if 3v3.
+    // Keep PC2 at its default tri-state setting for now.
+    
+    _delay_ms (2);  // wait for a bit, so we get a good reading
+    
+    // set up the ADC, reading ADC1 against the internal 1.1V regulator
+    ADMUX = (1 << REFS0) | (1 << REFS1) | (1 << MUX0);
+    
+    // disable the digital input buffer on ADC1's pin
+    DIDR0 = (1 << ADC1D);
+    
+    // the ADC needs 50kHz-200KHz from our 8MHz clock, set the prescaler to 1/64
+    // and enable the ADC system and begin an ADC conversion
+    ADCSRA = (1 << ADPS1) | (1 << ADPS2) | (1 << ADEN) | (1 << ADSC);
+    
+    // wait for the ADC measurement to finish
+    while (ADCSRA & (1 << ADSC));
+    
+    // Check the high 8 bits of the ADC result (we don't need 10-bit precision).
+    // A 5V input will show up as 1V: roughly 231
+    // A 3v3 input will show up as 0.67V: roughly 155
+    if (ADCH > 170)  // set the threshold at 3v6
+    {
+        // enable PC2 and set it low
+        set (GATE_DDR, GATE_NUM);
+        clear (GATE_PORT, GATE_NUM);
+    }
+    
+    // disable the ADC system, since we don't need it anymore
+    ADCSRA = 0;
+}
+
+
+
 void main (void)
 {
     // set the clock divider to 1, for 8 MHz
     CLKPR = (1<<CLKPCE);
     CLKPR = 0;
     
+    // set the data LED off, initially
+    set (DATA_LED_DDR, DATA_LED_NUM);
+    data_led_off();
     
     #ifdef TEST_FAT32
     // test the FAT32 interface and then busy-loop
     // LED on: still working
     // LED off: done
     // LED blinking: error
-    set (DDRB, 0);
+    set (DATE, 0);
     set (PORTB, 0);
     test_copy();
     clear (PORTB, 0);
     for (;;);
     #endif
+    
+    /*
+    // DEBUG: disable the voltage divider
+    set (GATE_DDR, GATE_NUM);
+    clear (GATE_PORT, GATE_NUM);
+    // DEBUG: toggle the LEDs forever, data at 2x the speed of power
+    for (;;)
+    {
+        toggle (DATA_LED_PORT, DATA_LED_NUM);
+        _delay_ms (100);
+        toggle (DATA_LED_PORT, DATA_LED_NUM);
+        toggle (GATE_PORT, GATE_NUM);
+        _delay_ms (100);
+    }
+    */
+    
+    
+    // decide whether to enable or disable the voltage divider between VCC and the SD card
+    voltage_divider_check();
     
     
     // set up I2C:
@@ -209,16 +297,14 @@ void main (void)
     sei();  // enable interrupts
     
     
-    
-    set (DDRB, 0);
-    
+    // do a quick visual indication that the system is ready
+    set (DATA_LED_DDR, DATA_LED_NUM);
     for (uint8_t i = 0; i < 10; i++)
     {
-        toggle (PORTB, 0);
+        toggle (DATA_LED_PORT, DATA_LED_NUM);
         _delay_ms (25);
     }
     
-    set (PORTB, 0);
     for (;;)
     {
         // process any commands received over I2C
@@ -228,7 +314,7 @@ void main (void)
             // I2C should be NACKing everything at this point
             
             process_order();
-            set (PORTB, 0);
+            data_led_off();
             
             new_order = false;
             TWI_ACK();
@@ -582,7 +668,7 @@ ISR (TWI_vect)
                 
                 // if we've read all the data the master said it would send, or if we're
                 // about to overflow our buffer
-                clear (PORTB, 0);
+                data_led_on();
                 receiving = false;
                 new_order = true;
                 
@@ -622,7 +708,7 @@ ISR (TWI_vect)
             else if (receiving)
             {  // if we got a stop or restart while receiving a command
                 // treat it as the end of the command and begin processing
-                clear (PORTB, 0);
+                data_led_on();
                 receiving = false;
                 new_order = true;
                 
