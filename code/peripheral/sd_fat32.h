@@ -82,7 +82,7 @@ typedef struct volume_id
     uint8_t  jump_instruction[3];
     char     oem_id[8];
     uint16_t bytes_per_sector;      // default is 512
-    uint8_t  sectors_per_cluster;
+    uint8_t  sectors_per_cluster;   // power of 2 between 1 and 128
     uint16_t reserved_sectors;
     uint8_t  number_of_fats;        // must be 2
     uint16_t fat16_root_entries;    // must be 0
@@ -91,10 +91,10 @@ typedef struct volume_id
     uint16_t fat16_sectors_per_fat; // must be 0
     uint16_t sectors_per_track;
     uint16_t number_of_heads;
-    uint32_t hidden_sectors;
+    uint32_t hidden_sectors;        // sectors before the start of the partition, ignored
     uint32_t fat32_sectors;
     uint32_t fat32_sectors_per_fat;
-    uint16_t filler;
+    uint16_t filler;                // flags to indicate which FAT is used, usually left empty
     uint16_t fat32_version;
     uint32_t root_cluster;          // usually 2
     uint16_t fs_info_sector;        // usually 1
@@ -102,10 +102,10 @@ typedef struct volume_id
     uint8_t  reserved[12];
     uint8_t  drive_number;
     uint8_t  reserved2;
-    uint8_t  extended_boot_sig;
+    uint8_t  extended_boot_sig;     // 0x29 indicates that the next 3 fields exist
     uint32_t volume_serial_number;
     char     volume_label[11];
-    char     system_id[8];          // must be "FAT32"
+    char     system_id[8];          // must be "FAT32   "
     uint8_t  bootstrap_code[420];
     uint16_t signature;             // must be FAT32_END_SIGNATURE
 } volume_id;

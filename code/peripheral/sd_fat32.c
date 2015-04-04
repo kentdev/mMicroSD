@@ -108,7 +108,7 @@ static inline bool end_of_chain (const uint32_t cluster_num)
 // get a sector number from a cluster number
 static inline uint32_t cluster_to_sector (const uint32_t cluster_num)
 {
-    return fat32_cluster_start_sector + (cluster_num - 2) * fat32_sectors_per_cluster;
+    return fat32_cluster_start_sector + (cluster_num - fat32_root_first_cluster) * fat32_sectors_per_cluster;
 }
 
 // get the sector of the FAT that contains this cluster
@@ -148,11 +148,11 @@ static bool sd_fat32_cluster_lookup (const uint32_t from_cluster,
                                       (uint8_t*)to_cluster,
                                       4);
     
-    /*m_usb_tx_string ("Cluster chain: ");
+    m_usb_tx_string ("Cluster chain: ");
     m_usb_tx_ulong (from_cluster);
     m_usb_tx_string (" -> ");
     m_usb_tx_ulong (*to_cluster);
-    m_usb_tx_string ("\n");*/
+    m_usb_tx_string ("\n");
     
     return retval;
     #else
@@ -534,8 +534,8 @@ bool extract_fs_info (void)
         return false;
     }
     
-    // adjust the start sector to account for the hidden and reserved sectors
-    fat32_start_sector += volume->hidden_sectors + volume->reserved_sectors;
+    // adjust the start sector to account for the reserved sectors
+    fat32_start_sector += volume->reserved_sectors;
     
     #ifdef FAT32_DEBUG
     #ifndef M4
