@@ -10,28 +10,27 @@
 # device is:
 #   atmega32u4 for the M2
 #   atmega168, atmega328, or atmega328p for the chip on the final board
-#   the M4 is not supported for use as an I2C slave peripheral, because why would you do that?
+#   the M2 and M4 are not supported for use as an I2C slave peripheral
 DEVICE     = atmega328
 CLOCK      = 8000000
 
 ifeq (atmega168,$(DEVICE))
     AVRDUDE_MCU := m168
     DEVICEDEF := -DATMEGA168
-endif
-ifeq (atmega328,$(DEVICE))
+else ifeq (atmega328,$(DEVICE))
     AVRDUDE_MCU := m328
     DEVICEDEF := -DATMEGA328
-endif
-ifeq (atmega328p,$(DEVICE))
+else ifeq (atmega328p,$(DEVICE))
     AVRDUDE_MCU := m328p
     DEVICEDEF := -DATMEGA328
-endif
-ifeq (atmega32u4,$(DEVICE))
-    DEVICEDEF := -DM2
+else ifeq (atmega32u4,$(DEVICE))
+    $(error The code for the mMicroSD peripheral should not be loaded on the M2)
+else
+    $(error Unknown device target)
 endif
 
 
-CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fshort-enums -std=gnu99 -Os
+CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fshort-enums -std=gnu99 -O2
 
 FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c fat32_filenames.c
 
@@ -101,6 +100,23 @@ flash: all
 else
 flash: all
 	avrdude -c avrispmkii -p $(AVRDUDE_MCU) -P usb -e -U flash:w:main.hex
+endif
+
+ifeq (atmega168,$(DEVICE))
+fuse:
+	avrdude -c avrispmkii -p $(AVRDUDE_MCU) -P usb -U lfuse:w:0xe2:m -U hfuse:w:0xde:m -U efuse:w:0x01:m
+endif
+ifeq (atmega328,$(DEVICE))
+fuse:
+	avrdude -c avrispmkii -p $(AVRDUDE_MCU) -P usb -U lfuse:w:0xe2:m -U hfuse:w:0xd9:m -U efuse:w:0x06:m
+endif
+ifeq (atmega328p,$(DEVICE))
+fuse:
+	avrdude -c avrispmkii -p $(AVRDUDE_MCU) -P usb -U lfuse:w:0xe2:m -U hfuse:w:0xd9:m -U efuse:w:0x06:m
+endif
+ifeq (atmega32u4,$(DEVICE))
+fuse:
+	$(error Don\'t try to program the M2\'s fuses\!)
 endif
 
 clean:
