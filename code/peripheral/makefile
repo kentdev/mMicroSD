@@ -29,10 +29,12 @@ else
     $(error Unknown device target)
 endif
 
+# Use -DDEBUG for debugging output (via USB on M2 or M4, via USART0 on ATmega168/328)
+#   Then use any of -DHIGHLEVEL_DEBUG -DHIGHLEVEL_CACHE_DEBUG -DLOWLEVEL_DEBUG
 
 CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fshort-enums -std=gnu99 -O2
 
-FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c fat32_filenames.c
+FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c fat32_filenames.c debug.c
 
 DEFINES = -DF_CPU=$(CLOCK) -DF_CLOCK=$(CLOCK) $(DEVICEDEF)
 
