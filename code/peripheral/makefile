@@ -29,9 +29,6 @@ else
     $(error Unknown device target)
 endif
 
-# Use -DDEBUG for debugging output (via USB on M2 or M4, via USART0 on ATmega168/328)
-#   Then use any of -DHIGHLEVEL_DEBUG -DHIGHLEVEL_CACHE_DEBUG -DLOWLEVEL_DEBUG
-
 CFLAGS = -Wall -funsigned-bitfields -ffreestanding -mcall-prologues -fshort-enums -std=gnu99 -O2
 
 FILES = crc.c sd_lowlevel.c sd_highlevel.c sd_highlevel_cache.c sd_fat32.c m_microsd.c fat32_filenames.c debug.c
@@ -49,30 +46,29 @@ DEFINES = -DF_CPU=$(CLOCK) -DF_CLOCK=$(CLOCK) $(DEVICEDEF)
 #                        written when it really hadn't)
 #   -DFREE_RAM           Periodically print out how much unused RAM is left
 #
-# All defines except for VERIFY_WRITE make the code pull in the m_usb library, and
-# won't work on the ATmega168 or ATmega328
+# The M2 and M4 print debugging info out via USB serial, while the ATmega168/328 send
+# debugging info out the UART TX pin
 
-DEFINES += -DVERIFY_WRITE
+DEFINES += -DVERIFY_WRITE -DDEBUG -DHIGHLEVEL_DEBUG -DFAT32_DEBUG
 
 USE_USB = 
-ifneq (,$(findstring DLOWLEVEL_DEBUG,$(DEFINES)))
-    USE_USB = YES
-endif
-ifneq (,$(findstring DHIGHLEVEL_DEBUG,$(DEFINES)))
-    USE_USB = YES
-endif
-ifneq (,$(findstring DFAT32_DEBUG,$(DEFINES)))
-    USE_USB = YES
-endif
-ifneq (,$(findstring DFREE_RAM,$(DEFINES)))
-    USE_USB = YES
+ifeq (,$(findstring DATMEGA,$(DEVICEDEF)))
+    ifneq (,$(findstring DLOWLEVEL_DEBUG,$(DEFINES)))
+        USE_USB = YES
+    endif
+    ifneq (,$(findstring DHIGHLEVEL_DEBUG,$(DEFINES)))
+        USE_USB = YES
+    endif
+    ifneq (,$(findstring DFAT32_DEBUG,$(DEFINES)))
+        USE_USB = YES
+    endif
+    ifneq (,$(findstring DFREE_RAM,$(DEFINES)))
+        USE_USB = YES
+    endif
 endif
 
 ifneq (,$(USE_USB))
 FILES := m_bus.c m_usb.c $(FILES)
-ifneq (atmega32u4,$(DEVICE))
-$(error Cannot use USB debugging unless programming on the M2)
-endif
 endif
 
 COMPILE = avr-gcc $(CFLAGS) $(DEFINES) -mmcu=$(DEVICE)

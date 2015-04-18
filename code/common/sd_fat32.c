@@ -9,21 +9,16 @@
 *******************************************************************************/
 
 #include "sd_fat32.h"
-
-#if defined(FAT32_DEBUG) || defined (FREE_RAM)
-#ifndef M4
-#include "m_usb.h"
-#endif
-#endif
+#include "debug.h"
 
 #ifdef FREE_RAM
 void free_ram (void)
 {
   extern int __heap_start, *__brkval; 
   int v; 
-  m_usb_tx_string ("Free RAM: ");
-  m_usb_tx_uint( (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval) );
-  m_usb_tx_char ('\n');
+  debug ("Free RAM: ");
+  debuguint( (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval) );
+  debug ("\n");
 }
 #endif
 
@@ -148,11 +143,11 @@ static bool sd_fat32_cluster_lookup (const uint32_t from_cluster,
                                       (uint8_t*)to_cluster,
                                       4);
     
-    m_usb_tx_string ("Cluster chain: ");
-    m_usb_tx_ulong (from_cluster);
-    m_usb_tx_string (" -> ");
-    m_usb_tx_ulong (*to_cluster);
-    m_usb_tx_string ("\n");
+    debug ("Cluster chain: ");
+    debugulong (from_cluster);
+    debug (" -> ");
+    debugulong (*to_cluster);
+    debug ("\n");
     
     return retval;
     #else
@@ -212,13 +207,9 @@ static bool sd_fat32_next_empty_cluster (const uint32_t from_cluster,
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Next empty cluster: ");
-    m_usb_tx_ulong (*empty_cluster);
-    m_usb_tx_char ('\n');
-    #else
-    printf ("Next empty cluster: %04x\n", *empty_cluster);
-    #endif
+    debug ("Next empty cluster: ");
+    debugulong (*empty_cluster);
+    debug ("\n");
     #endif
     
     #ifdef FREE_RAM
@@ -241,19 +232,15 @@ bool sd_fat32_set_cluster (const uint32_t from_cluster,
     #endif
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Set cluster ");
-    m_usb_tx_ulong (from_cluster);
-    m_usb_tx_string (" (block ");
-    m_usb_tx_ulong (target_sector);
-    m_usb_tx_string (", offset ");
-    m_usb_tx_ulong (sector_offset);
-    m_usb_tx_string (") to ");
-    m_usb_tx_ulong (to_cluster);
-    m_usb_tx_char ('\n');
-    #else
-    printf ("Set cluster %lu (block %lu, offset %lu) to %lu\n", from_cluster, target_sector, sector_offset, to_cluster);
-    #endif
+    debug ("Set cluster ");
+    debugulong (from_cluster);
+    debug (" (block ");
+    debugulong (target_sector);
+    debug (", offset ");
+    debugulong (sector_offset);
+    debug (") to ");
+    debugulong (to_cluster);
+    debug ("\n");
     #endif
     
     // need to set the entry in all FATs
@@ -284,13 +271,9 @@ bool sd_fat32_append_cluster (const uint32_t cluster_in_chain,
     uint32_t next_cluster;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Append cluster to chain that includes ");
-    m_usb_tx_ulong (cluster_in_chain);
-    m_usb_tx_char ('\n');
-    #else
-    printf ("Append cluster to chain that includes %lu\n", cluster_in_chain);
-    #endif
+    debug ("Append cluster to chain that includes ");
+    debugulong (cluster_in_chain);
+    debug ("\n");
     #endif
     
     if (end_of_chain (cluster_in_chain))
@@ -438,9 +421,9 @@ bool init_mbr (void)
     {
         /*
         #ifdef FAT32_DEBUG
-        m_usb_tx_string ("partition type: ");
-        m_usb_tx_hex (mbr.partition[i].type_code);
-        m_usb_tx_string ("\n");
+        debug ("partition type: ");
+        debughex (mbr.partition[i].type_code);
+        debug ("\n");
         #endif
         */
         
@@ -493,28 +476,19 @@ bool extract_fs_info (void)
     volume_id *volume = (volume_id*)sector->data;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("start sector: ");
-    m_usb_tx_ulong (fat32_partition_start_sector);
-    m_usb_tx_string ("\nnumber of sectors: ");
-    m_usb_tx_ulong (fat32_number_of_sectors);
-    m_usb_tx_string ("\nhidden sectors: ");
-    m_usb_tx_ulong (volume->hidden_sectors);
-    m_usb_tx_string ("\nreserved sectors: ");
-    m_usb_tx_ulong (volume->reserved_sectors);
-    m_usb_tx_string ("\nsectors per FAT: ");
-    m_usb_tx_ulong (volume->fat32_sectors_per_fat);
-    m_usb_tx_string ("\nnumber of FATs: ");
-    m_usb_tx_ulong (volume->number_of_fats);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("start sector: %lu\n", fat32_partition_start_sector);
-    printf ("number of sectors: %lu\n", fat32_number_of_sectors);
-    printf ("hidden sectors: %lu\n", volume->hidden_sectors);
-    printf ("reserved sectors: %lu\n", volume->reserved_sectors);
-    printf ("sectors per FAT: %lu\n", volume->fat32_sectors_per_fat);
-    printf ("number of FATs: %lu\n", volume->number_of_fats);
-    #endif
+    debug ("start sector: ");
+    debugulong (fat32_partition_start_sector);
+    debug ("\nnumber of sectors: ");
+    debugulong (fat32_number_of_sectors);
+    debug ("\nhidden sectors: ");
+    debugulong (volume->hidden_sectors);
+    debug ("\nreserved sectors: ");
+    debugulong (volume->reserved_sectors);
+    debug ("\nsectors per FAT: ");
+    debugulong (volume->fat32_sectors_per_fat);
+    debug ("\nnumber of FATs: ");
+    debugulong (volume->number_of_fats);
+    debug ("\n");
     #endif
     
     // check for expected values
@@ -538,18 +512,13 @@ bool extract_fs_info (void)
     fat32_start_sector += volume->reserved_sectors;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("new start sector: ");
-    m_usb_tx_ulong (fat32_start_sector);
-    m_usb_tx_string ("\nnumber of sectors from MBR = ");
-    m_usb_tx_long (fat32_number_of_sectors);
-    m_usb_tx_string (", from volume = ");
-    m_usb_tx_ulong (volume->fat32_sectors);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("new start sector: %lu\n", fat32_start_sector);
-    printf ("number of sectors from MBR = %ld, from volume = %lu\n", fat32_number_of_sectors, volume->fat32_sectors);
-    #endif
+    debug ("new start sector: ");
+    debugulong (fat32_start_sector);
+    debug ("\nnumber of sectors from MBR = ");
+    debuglong (fat32_number_of_sectors);
+    debug (", from volume = ");
+    debugulong (volume->fat32_sectors);
+    debug ("\n");
     #endif
     
     // (use volume->fat32_sectors instead of the number of sectors we got from the MBR)
@@ -567,13 +536,9 @@ bool extract_fs_info (void)
     if (volume->fs_info_sector == (uint16_t)0 || volume->fs_info_sector == (uint16_t)0xffff)
     {  // free cluster count is unsupported
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("FAT32 cluster count unsupported, FS info sector is ");
-        m_usb_tx_hex (volume->fs_info_sector);
-        m_usb_tx_string ("\n");
-        #else
-        printf ("FAT32 cluster count unsupported, FS info sector is %04x\n", volume->fs_info_sector);
-        #endif
+        debug ("FAT32 cluster count unsupported, FS info sector is ");
+        debughex (volume->fs_info_sector);
+        debug ("\n");
         #endif
         
         fat32_fs_info_sector = 0;
@@ -585,13 +550,9 @@ bool extract_fs_info (void)
         fat32_fs_info_sector = fat32_partition_start_sector + (uint32_t)volume->fs_info_sector;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("FAT32 info sector: sector ");
-        m_usb_tx_ulong ((uint32_t)volume->fs_info_sector);
-        m_usb_tx_string ("\n");
-        #else
-        printf ("FAT32 info sector: sector %lu + %lu = %lu\n", fat32_partition_start_sector, (uint32_t)volume->fs_info_sector, fat32_fs_info_sector);
-        #endif
+        debug ("FAT32 info sector: sector ");
+        debugulong ((uint32_t)volume->fs_info_sector);
+        debug ("\n");
         #endif
         
         // the FS info block is also too large to copy, so read that directly too
@@ -617,24 +578,18 @@ bool extract_fs_info (void)
             fs_info->boot_signature      != FAT32_END_SIGNATURE)
         {  // invalid FS info signature, mark the free cluster count as unused
             #ifdef FAT32_DEBUG
-            #ifndef M4
-            m_usb_tx_string ("Bad FS info signatures:\n\t");
-            m_usb_tx_ulong (fs_info->lead_signature);
-            m_usb_tx_string (" vs expected ");
-            m_usb_tx_ulong ((uint32_t)0x41615252);
-            m_usb_tx_string ("\n\t");
-            m_usb_tx_ulong (fs_info->structure_signature);
-            m_usb_tx_string (" vs expected ");
-            m_usb_tx_ulong ((uint32_t)0x61417272);
-            m_usb_tx_string ("\n\t");
-            m_usb_tx_hex (fs_info->boot_signature);
-            m_usb_tx_string (" vs expected ");
-            m_usb_tx_hex (FAT32_END_SIGNATURE);
-            #else
-            printf ("Bad FS info signatures:\n\t%lu vs expected %lu", fs_info->lead_signature, (uint32_t)0x41615252);
-            printf ("\n\t%lu vs expected %lu", fs_info->structure_signature, (uint32_t)0x61417272);
-            printf ("\n\t%04x vs expected %04x\n", fs_info->boot_signature, FAT32_END_SIGNATURE);
-            #endif
+            debug ("Bad FS info signatures:\n\t");
+            debugulong (fs_info->lead_signature);
+            debug (" vs expected ");
+            debugulong ((uint32_t)0x41615252);
+            debug ("\n\t");
+            debugulong (fs_info->structure_signature);
+            debug (" vs expected ");
+            debugulong ((uint32_t)0x61417272);
+            debug ("\n\t");
+            debughex (fs_info->boot_signature);
+            debug (" vs expected ");
+            debughex (FAT32_END_SIGNATURE);
             #endif
             
             fat32_fs_info_sector = 0;
@@ -647,31 +602,21 @@ bool extract_fs_info (void)
             fat32_starting_free_cluster_count = fat32_free_cluster_count;
             
             #ifdef FAT32_DEBUG
-            #ifndef M4
-            m_usb_tx_string ("Free clusters: ");
-            m_usb_tx_ulong (fat32_free_cluster_count);
-            m_usb_tx_string ("\n");
-            #else
-            printf ("Free clusters %lu\n", fat32_free_cluster_count);
-            #endif
+            debug ("Free clusters: ");
+            debugulong (fat32_free_cluster_count);
+            debug ("\n");
             #endif
         }
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("sectors per cluster: ");
-    m_usb_tx_uint (fat32_sectors_per_cluster);
-    m_usb_tx_string ("\nsector of first cluster: ");
-    m_usb_tx_ulong (fat32_cluster_start_sector);
-    m_usb_tx_string ("\nfirst cluster of root dir: ");
-    m_usb_tx_ulong (fat32_root_first_cluster);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("sectors per cluster: %u\n", fat32_sectors_per_cluster);
-    printf ("sector of first cluster: %lu\n", fat32_cluster_start_sector);
-    printf ("first cluster of root dir: %lu\n", fat32_root_first_cluster);
-    #endif
+    debug ("sectors per cluster: ");
+    debuguint (fat32_sectors_per_cluster);
+    debug ("\nsector of first cluster: ");
+    debugulong (fat32_cluster_start_sector);
+    debug ("\nfirst cluster of root dir: ");
+    debugulong (fat32_root_first_cluster);
+    debug ("\n");
     #endif
     
     #ifdef FREE_RAM
@@ -687,11 +632,7 @@ bool extract_fs_info (void)
 bool sd_fat32_init (void)
 {
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("initializing FAT32\n");
-    #else
-    printf ("initializing FAT32\n");
-    #endif
+    debug ("initializing FAT32\n");
     #endif
     
     fat32_initialized = false;
@@ -699,33 +640,21 @@ bool sd_fat32_init (void)
         return false;  // error_code will have been set in init_card
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Card OK\n");
-    #else
-    printf ("Card OK\n");
-    #endif
+    debug ("Card OK\n");
     #endif
     
     if (!init_mbr())
         return false;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("MBR OK\n");
-    #else
-    printf ("MBR OK\n");
-    #endif
+    debug ("MBR OK\n");
     #endif
     
     if (!extract_fs_info())
         return false;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("FAT32 FS OK\n");
-    #else
-    printf ("FAT32 FS OK\n");
-    #endif
+    debug ("FAT32 FS OK\n");
     #endif
     
     fat32_initialized = true;
@@ -775,13 +704,9 @@ bool sd_fat32_shutdown (void)
         if (fat32_starting_free_cluster_count != fat32_free_cluster_count)
         {  // if the value has changed
             #ifdef FAT32_DEBUG
-            #ifndef M4
-            m_usb_tx_string ("Updating free cluster count: ");
-            m_usb_tx_ulong (fat32_free_cluster_count);
-            m_usb_tx_string ("\n");
-            #else
-            printf ("Updating free cluster count: %lu\n", fat32_free_cluster_count);
-            #endif
+            debug ("Updating free cluster count: ");
+            debugulong (fat32_free_cluster_count);
+            debug ("\n");
             #endif
             
             if (!write_partial_block (fat32_fs_info_sector,
@@ -795,24 +720,16 @@ bool sd_fat32_shutdown (void)
         #ifdef FAT32_DEBUG
         else
         {
-            #ifndef M4
-            m_usb_tx_string ("Free cluster count unchanged: ");
-            m_usb_tx_ulong (fat32_free_cluster_count);
-            m_usb_tx_string ("\n");
-            #else
-            printf ("Free cluster count unchanged: %lu\n", fat32_free_cluster_count);
-            #endif
+            debug ("Free cluster count unchanged: ");
+            debugulong (fat32_free_cluster_count);
+            debug ("\n");
         }
         #endif
     }
     #ifdef FAT32_DEBUG
     else
     {
-        #ifndef M4
-        m_usb_tx_string ("Free cluster count unsupported\n");
-        #else
-        printf ("Free cluster count unsupported\n");
-        #endif
+        debug ("Free cluster count unsupported\n");
     }
     #endif
     
@@ -928,13 +845,9 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
                                   sizeof (dir_entry)) )
         {
             #ifdef FAT32_DEBUG
-            #ifndef M4
-            m_usb_tx_string ("Error reading entry: ");
-            m_usb_tx_uint (error_code);
-            m_usb_tx_string ("\n");
-            #else
-            printf ("Error reading entry: %u\n", error_code);
-            #endif
+            debug ("Error reading entry: ");
+            debuguint (error_code);
+            debug ("\n");
             #endif
             return false;
         }
@@ -1047,11 +960,7 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
                     {  // if we need to append a new end-of-dir marker
                         // add a new cluster to the chain
                         #ifdef FAT32_DEBUG
-                        #ifndef M4
-                        m_usb_tx_string ("appending new cluster\n");
-                        #else
-                        printf ("appending new cluster\n");
-                        #endif
+                        debug ("appending new cluster\n");
                         #endif
                         
                         if (!sd_fat32_append_cluster (current_cluster, &new_cluster))
@@ -1061,13 +970,9 @@ bool sd_fat32_traverse_directory (dir_entry_condensed *buffer,
                         current_sector = cluster_to_sector (current_cluster);
                         
                         #ifdef FAT32_DEBUG
-                        #ifndef M4
-                        m_usb_tx_string ("New final cluster: ");
-                        m_usb_tx_ulong (new_cluster);
-                        m_usb_tx_char ('\n');
-                        #else
-                        printf ("New final cluster: %lu\n", new_cluster);
-                        #endif
+                        debug ("New final cluster: ");
+                        debugulong (new_cluster);
+                        debug ("\n");
                         #endif
                         
                         // fill the new cluster with zeroes
@@ -1178,25 +1083,14 @@ bool sd_fat32_search_dir (const char *search_name,
     else
     {
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("filename to search for: '");
+        debug ("filename to search for: '");
         for (uint8_t i = 0; i < 12; i++)
         {
             if (search_name[i] == '\0')
                 break;
-            m_usb_tx_char (search_name[i]);
+            debugchar (search_name[i]);
         }
-        m_usb_tx_string ("'\n");
-        #else
-        printf ("filename to search for: '");
-        for (uint8_t i = 0; i < 12; i++)
-        {
-            if (search_name[i] == '\0')
-                break;
-            printf ("%c", search_name[i]);
-        }
-        printf ("'\n");
-        #endif
+        debug ("'\n");
         #endif
         
         if (search_name[0] == '.' && search_name[1] == '\0')
@@ -1219,17 +1113,10 @@ bool sd_fat32_search_dir (const char *search_name,
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("search for filename on disk: '");
+    debug ("search for filename on disk: '");
     for (uint8_t i = 0; i < 11; i++)
-        m_usb_tx_char (name_8_3[i]);
-    m_usb_tx_string ("'\n");
-    #else
-    printf ("search for filename on disk: '");
-    for (uint8_t i = 0; i < 11; i++)
-        printf ("%c", name_8_3[i]);
-    printf ("'\n");
-    #endif
+        debugchar (name_8_3[i]);
+    debug ("'\n");
     #endif
     
     bool read_result = sd_fat32_traverse_directory (result, READ_DIR_START);
@@ -1613,13 +1500,9 @@ bool sd_fat32_open_file (const char *name,
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Opening file in slot ");
-    m_usb_tx_uint ((uint16_t)*file_id);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("Opening file in slot %u\n", (uint16_t)*file_id);
-    #endif
+    debug ("Opening file in slot ");
+    debuguint ((uint16_t)*file_id);
+    debug ("\n");
     #endif
     
     
@@ -1628,12 +1511,8 @@ bool sd_fat32_open_file (const char *name,
         if (action == CREATE_FILE)
         {  // delete the existing file
             #ifdef FAT32_DEBUG
-            #ifndef M4
-            m_usb_tx_string ("File exists, deleting");
-            m_usb_tx_char ('\n');
-            #else
-            printf ("File exists, deleting\n");
-            #endif
+            debug ("File exists, deleting");
+            debug ("\n");
             #endif
             
             sd_fat32_delete (name);
@@ -1660,18 +1539,11 @@ bool sd_fat32_open_file (const char *name,
         entry.file_size = 0;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("Creating file '");
+        debug ("Creating file '");
         for (uint8_t i = 0; i < 11; i++)
-            m_usb_tx_char (entry.name[i]);
-        m_usb_tx_char ('\'');
-        m_usb_tx_char ('\n');
-        #else
-        printf ("Creating file '");
-        for (uint8_t i = 0; i < 11; i++)
-            printf ("%c", entry.name[i]);
-        printf ("'\n");
-        #endif
+            debugchar (entry.name[i]);
+        debugchar ('\'');
+        debug ("\n");
         #endif
         
         // add the entry to the current directory
@@ -1756,15 +1628,11 @@ bool sd_fat32_close_file (uint8_t file_id)
         entry.file_size = file->size;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("Updating entry: first cluster = ");
-        m_usb_tx_ulong (entry.first_cluster);
-        m_usb_tx_string (", file size = ");
-        m_usb_tx_ulong (entry.file_size);
-        m_usb_tx_string ("\n");
-        #else
-        printf ("Updating entry: first cluster = %lu, file size = %lu\n", entry.first_cluster, entry.file_size);
-        #endif
+        debug ("Updating entry: first cluster = ");
+        debugulong (entry.first_cluster);
+        debug (", file size = ");
+        debugulong (entry.file_size);
+        debug ("\n");
         #endif
         
         // temporarily jump back into whatever directory the file is in
@@ -1777,13 +1645,9 @@ bool sd_fat32_close_file (uint8_t file_id)
         #ifdef FAT32_DEBUG
         if (!result)
         {
-            #ifndef M4
-            m_usb_tx_string ("UPDATE FAILED: ");
-            m_usb_tx_uint (error_code);
-            m_usb_tx_char ('\n');
-            #else
-            printf ("UPDATE FAILED: %u\n", error_code);
-            #endif
+            debug ("UPDATE FAILED: ");
+            debuguint (error_code);
+            debug ("\n");
         }
         #endif
         
@@ -1946,15 +1810,11 @@ bool sd_fat32_read_file (uint8_t file_id,
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Reading ");
-    m_usb_tx_ulong (length);
-    m_usb_tx_string (" bytes from file id ");
-    m_usb_tx_uint ((uint16_t)file_id);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("Reading %lu bytes from file id %u\n", length, (uint16_t)file_id);
-    #endif
+    debug ("Reading ");
+    debugulong (length);
+    debug (" bytes from file id ");
+    debuguint ((uint16_t)file_id);
+    debug ("\n");
     #endif
     
     // read to the end of the sector while the read length would put us past the sector
@@ -2119,27 +1979,19 @@ bool extend_file_clusters (opened_file *file)
     #endif
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("EXTEND FILE: First cluster is ");
-    m_usb_tx_ulong (file->first_cluster);
-    m_usb_tx_string (", current is ");
-    m_usb_tx_ulong (file->current_cluster);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("EXTEND FILE: First cluster is %lu, current is %lu\n", file->first_cluster, file->current_cluster);
-    #endif
+    debug ("EXTEND FILE: First cluster is ");
+    debugulong (file->first_cluster);
+    debug (", current is ");
+    debugulong (file->current_cluster);
+    debug ("\n");
     #endif
     
     if (end_of_chain (file->first_cluster))
     {  // if the file doesn't have any clusters allocated to it yet
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("Search starts at ");
-        m_usb_tx_ulong (file->directory_starting_cluster);
-        m_usb_tx_char ('\n');
-        #else
-        printf ("Search starts at %lu\n", file->directory_starting_cluster);
-        #endif
+        debug ("Search starts at ");
+        debugulong (file->directory_starting_cluster);
+        debug ("\n");
         #endif
         
         // find an empty cluster
@@ -2147,13 +1999,9 @@ bool extend_file_clusters (opened_file *file)
             return false;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("  Next empty cluster: ");
-        m_usb_tx_ulong (new_cluster);
-        m_usb_tx_char ('\n');
-        #else
-        printf ("  Next empty cluster: %lu\n", new_cluster);
-        #endif
+        debug ("  Next empty cluster: ");
+        debugulong (new_cluster);
+        debug ("\n");
         #endif
         
         // mark the cluster as the final cluster in its chain
@@ -2165,36 +2013,24 @@ bool extend_file_clusters (opened_file *file)
         file->current_cluster = new_cluster;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("first cluster is now ");
-        m_usb_tx_ulong (file->first_cluster);
-        m_usb_tx_string ("\n");
-        #else
-        printf ("first cluster is now %lu\n", file->first_cluster);
-        #endif
+        debug ("first cluster is now ");
+        debugulong (file->first_cluster);
+        debug ("\n");
         #endif
     }
     else
     {  // if the file has a first cluster, and just needs to be extended
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("Adding cluster to chain... ");
-        #else
-        printf ("Adding cluster to chain... ");
-        #endif
+        debug ("Adding cluster to chain... ");
         #endif
         
         if (!sd_fat32_append_cluster (file->first_cluster, &file->current_cluster))
             return false;
         
         #ifdef FAT32_DEBUG
-        #ifndef M4
-        m_usb_tx_string ("added cluster ");
-        m_usb_tx_ulong (file->current_cluster);
-        m_usb_tx_string ("\n");
-        #else
-        printf ("added cluster %lu\n", file->current_cluster);
-        #endif
+        debug ("added cluster ");
+        debugulong (file->current_cluster);
+        debug ("\n");
         #endif
     }
     
@@ -2240,15 +2076,11 @@ bool sd_fat32_write_file (uint8_t file_id,
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Writing ");
-    m_usb_tx_ulong (length);
-    m_usb_tx_string (" bytes to file id ");
-    m_usb_tx_uint ((uint16_t)file_id);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("Writing %lu bytes to file id %u\n", length, (uint16_t)file_id);
-    #endif
+    debug ("Writing ");
+    debugulong (length);
+    debug (" bytes to file id ");
+    debuguint ((uint16_t)file_id);
+    debug ("\n");
     #endif
     
     // read to the end of the sector while the read length would put us past the sector
@@ -2361,11 +2193,7 @@ bool sd_fat32_delete (const char *name)
     #endif
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Removing entry\n");
-    #else
-    printf ("Removing entry\n");
-    #endif
+    debug ("Removing entry\n");
     #endif
     
     for (uint8_t i = 0; i < MAX_FILES; i++)
@@ -2376,11 +2204,7 @@ bool sd_fat32_delete (const char *name)
             if (fs_filenames_match (to_remove.name, files[i].name_on_fs))
             {  // if it is, close it first
                 #ifdef FAT32_DEBUG
-                #ifndef M4
-                m_usb_tx_string ("File is open, closing\n");
-                #else
-                printf ("File is open, closing\n");
-                #endif
+                debug ("File is open, closing\n");
                 #endif
                 
                 if (!sd_fat32_close_file (i))
@@ -2397,13 +2221,9 @@ bool sd_fat32_delete (const char *name)
     }
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Entry removed, clearing clusters starting with ");
-    m_usb_tx_ulong (to_remove.first_cluster);
-    m_usb_tx_string ("\n");
-    #else
-    printf ("Entry removed, clearing clusters starting with %lu\n", to_remove.first_cluster);
-    #endif
+    debug ("Entry removed, clearing clusters starting with ");
+    debugulong (to_remove.first_cluster);
+    debug ("\n");
     #endif
     
     // if the entry was successfully removed from the current directory, it
@@ -2412,11 +2232,7 @@ bool sd_fat32_delete (const char *name)
         return false;
     
     #ifdef FAT32_DEBUG
-    #ifndef M4
-    m_usb_tx_string ("Clusters cleared\n");
-    #else
-    printf ("Clusters cleared\n");
-    #endif
+    debug ("Clusters cleared\n");
     #endif
     
     #ifdef FREE_RAM
@@ -2425,6 +2241,4 @@ bool sd_fat32_delete (const char *name)
     
     return true;
 }
-
-
 
