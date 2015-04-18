@@ -30,3 +30,6 @@
 
 # EAGLE temporaries
 *.*#*
+
+# temporary files
+*~
