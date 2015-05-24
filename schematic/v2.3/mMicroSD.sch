@@ -7838,7 +7838,7 @@ Source: www.kingbright.com</description>
 <junction x="12.7" y="190.5"/>
 </segment>
 </net>
-<net name="N$5" class="0">
+<net name="SD_MISO" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="IL4"/>
 <wire x1="73.66" y1="127" x2="73.66" y2="129.54" width="0.1524" layer="91"/>
@@ -7847,7 +7847,7 @@ Source: www.kingbright.com</description>
 <pinref part="SDCONN" gate="G$1" pin="MISO"/>
 </segment>
 </net>
-<net name="N$6" class="0">
+<net name="SD_MOSI" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="OL3"/>
 <wire x1="78.74" y1="127" x2="78.74" y2="129.54" width="0.1524" layer="91"/>
@@ -7856,7 +7856,7 @@ Source: www.kingbright.com</description>
 <wire x1="73.66" y1="132.08" x2="73.66" y2="134.62" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$11" class="0">
+<net name="SD_CS" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="OL2"/>
 <wire x1="81.28" y1="127" x2="81.28" y2="132.08" width="0.1524" layer="91"/>
@@ -7865,7 +7865,7 @@ Source: www.kingbright.com</description>
 <wire x1="83.82" y1="132.08" x2="83.82" y2="134.62" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$15" class="0">
+<net name="SD_SCK" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="OL1"/>
 <wire x1="83.82" y1="127" x2="83.82" y2="129.54" width="0.1524" layer="91"/>

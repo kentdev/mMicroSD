@@ -2203,7 +2203,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="14.0120375" y1="14.9749625" x2="12.5840375" y2="14.9749625" width="0.1778" layer="16"/>
 <wire x1="12.5840375" y1="14.9749625" x2="12.573" y2="14.986" width="0.1778" layer="16"/>
 </signal>
-<signal name="N$5">
+<signal name="SD_MISO">
 <contactref element="IC1" pad="5"/>
 <contactref element="SDCONN" pad="P$7"/>
 <wire x1="14.2970125" y1="5.616296875" x2="14.2970125" y2="7.4199875" width="0.1778" layer="1"/>
@@ -2218,7 +2218,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="3.556" y1="5.207" x2="3.890178125" y2="5.207" width="0.1778" layer="16"/>
 <wire x1="3.890178125" y1="5.207" x2="4.082184375" y2="5.26899375" width="0.1778" layer="16"/>
 </signal>
-<signal name="N$6">
+<signal name="SD_MOSI">
 <contactref element="IC1" pad="4"/>
 <contactref element="SDCONN" pad="P$3"/>
 <wire x1="18.6970125" y1="5.616296875" x2="18.6970125" y2="2.1870125" width="0.1778" layer="1"/>
@@ -2233,7 +2233,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="1.905" y1="4.572" x2="4.035190625" y2="4.572" width="0.1778" layer="16"/>
 <wire x1="4.035190625" y1="4.572" x2="4.082184375" y2="4.61899375" width="0.1778" layer="16"/>
 </signal>
-<signal name="N$11">
+<signal name="SD_CS">
 <contactref element="IC1" pad="3"/>
 <contactref element="SDCONN" pad="P$2"/>
 <wire x1="19.7970125" y1="5.616296875" x2="19.7970125" y2="2.0170125" width="0.1778" layer="1"/>
@@ -2247,7 +2247,7 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="2.413" y1="3.937" x2="4.050190625" y2="3.937" width="0.1778" layer="16"/>
 <wire x1="4.050190625" y1="3.937" x2="4.082184375" y2="3.96899375" width="0.1778" layer="16"/>
 </signal>
-<signal name="N$15">
+<signal name="SD_SCK">
 <contactref element="IC1" pad="2"/>
 <contactref element="SDCONN" pad="P$5"/>
 <via x="2.413" y="2.921" extent="1-16" drill="0.3556"/>
