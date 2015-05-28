@@ -4,9 +4,15 @@
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+bool debug_initialized = false;
 
 inline void send_char (const char c)
 {
+    if (!debug_initialized)
+        init_debug();
+    
     while (!(UCSR0A & (1 << UDRE0)));  // wait for the transmit buffer to be empty
     UDR0 = c;  // send the current byte
 }
@@ -38,7 +44,7 @@ inline char hex (const char nybble)
 
 void debugUART_hexchar (const char c)
 {
-    send_char (hex (c >> 4));
+    send_char (hex ((c >> 4) & 0x0f));
     send_char (hex (c & 0x0f));
 }
 
@@ -119,6 +125,9 @@ void init_debug (void)
     UBRR0 = 51;  // 9600bps at 8MHz clock, 19200bps at 16MHz
     UCSR0B = (1 << TXEN0);  // enable TX
     UCSR0C = (1 << UCSZ00) | (1 << UCSZ01);  // async UART, 8 data bits, 1 stop bit, no parity
+    UDR0 = 0;
     #endif
+    
+    debug_initialized = true;
 }
 
